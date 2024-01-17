@@ -15,7 +15,7 @@ from src.mcqgenerator.logger import logging
 
 
 # Open the JSON file and load its content
-with open('/config/workspace/Response.json', 'r') as json_file:
+with open('/C:\Users\ashok\Mcq_Gen\Response.json', 'r') as json_file:
     RESPONSE_JSON = json.load(file)
 
 #creating a title for the app
@@ -65,26 +65,26 @@ if button and uploaded_file is not None and mcq_count and subject and tone:
             print(f"Completion Tokens:{cb.completion_tokens}")
             print(f"Total Cost:{cb.total_cost}")
             if isinstance(response, dict):
-
-                #Extract the quiz data from the response
-                quiz=response.get("quiz", None)
+                
+                quiz = response.get("quiz", None)
                 if quiz is not None:
-                    table_data=get_table_data(quiz)
+                    table_data = get_table_data(quiz)
                     if table_data is not None:
-                        df=pd.DataFrame(table_data)
-                        df.index=df.index+1
+                        df = pd.DataFrame(table_data)
+                        df.index = df.index + 1
                         st.table(df)
-                        
-                        #Display the review in a text box as well
-                        st.text_area(label="Review",value=response["review"])
+
+                         # Display the review in a text box as well
+                        st.text_area(label="Review", value=response["review"])
                     else:
-                        st.error("Error in the table data")
-
-            else:
-                st.write(response)
-
-
-
+                         st.error("Error in the table data")
+                        
+                else:
+                    st.write(response)
+                
+               
+            
+   
 
 
 
