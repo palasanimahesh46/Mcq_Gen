@@ -15,8 +15,10 @@ from src.mcqgenerator.logger import logging
 
 
 # Open the JSON file and load its content
-with open('C:\\Users\\ashok\\Mcq_Gen\\Response.json', 'r') as json_file:
-    RESPONSE_JSON = json.load(file)
+#with open("C:\Users\ashok\Mcq_Gen\response.json", 'r') as json_file:
+    #RESPONSE_JSON = json.load(file)
+
+
 
 #creating a title for the app
 st.title("MCQs Creator Application with LangChain 🧠⛓️")
@@ -35,67 +37,60 @@ subject=st.text_input("Insert Subject", max_chars=20)
 # Quiz Tone
 tone=st.text_input("Complexity Level Of Questions", max_chars=20, placeholder="Simple")
 
-#Add Button
-button=st.form_submit_button("Create MCQs")
+import streamlit as st
 
-# Check if the button is clicked and all fields have input
-if button and uploaded_file is not None and mcq_count and subject and tone:
-    with st.spinner("loading..."):
-        try:
-            text=read_file(uploaded_file)
-            #Count tokens and the cost of API call
-            with get_openai_callback() as cb:
-                response=generate_evaluate_chain(
-                    {
-                        "text": text,
-                        "number": mcq_count,
-                        "subject": subject,
-                        "tone": tone,
-                        "response_json": json.dumps(RESPONSE_JSON)
-                    }
-                )
-            #st.write(response)
-        except Exception as e:
-            traceback.print_exception(type(e),e,e.__traceback__)
-            st.error("Error")
+# Create a form using st.form
+with st.form(key='my_form'):
+    # Add form components
+    text_input = st.text_input('Enter text:')
+    checkbox = st.checkbox('Enable feature')
 
-        else:
-            print(f"Total Tokens:{cb.total_tokens}")
-            print(f"Prompt Tokens:{cb.prompt_tokens}")
-            print(f"Completion Tokens:{cb.completion_tokens}")
-            print(f"Total Cost:{cb.total_cost}")
-            if isinstance(response, dict):
-                
-                quiz = response.get("quiz", None)
-                if quiz is not None:
-                    table_data = get_table_data(quiz)
-                    if table_data is not None:
-                        df = pd.DataFrame(table_data)
-                        df.index = df.index + 1
-                        st.table(df)
+    # Add a submit button
+    submit_button = st.form_submit_button(label='Create MCQs')
+    
+    # Use the form values after submission
+    if submit_button:
+        # Process form data here
+        st.write(f'Text Input: {text_input}')
+        st.write(f'Checkbox: {checkbox}')
 
-                         # Display the review in a text box as well
-                        st.text_area(label="Review", value=response["review"])
-                    else:
-                         st.error("Error in the table data")
-                        
+        # Check if the button is clicked and all fields have input
+        if uploaded_file is not None and mcq_count and subject and tone:
+            with st.spinner("loading..."):
+                try:
+                    text = read_file(uploaded_file)
+                    # Count tokens and the cost of the API call
+                    with get_openai_callback() as cb:
+                        response = generate_evaluate_chain(
+                            {
+                                "text": text,
+                                "number": mcq_count,
+                                "subject": subject,
+                                "tone": tone,
+                                "response_json": json.dumps(RESPONSE_JSON)
+                            }
+                        )
+                    # st.write(response)
+                except Exception as e:
+                    traceback.print_exception(type(e), e, e.__traceback__)
+                    st.error("Error")
                 else:
-                    st.write(response)
-                
-               
-            
-   
-
-
-
-
-    
-    
-    
-        
-       
-            
-           
-            
-           
-
+                    print(f"Total Tokens:{cb.total_tokens}")
+                    print(f"Prompt Tokens:{cb.prompt_tokens}")
+                    print(f"Completion Tokens:{cb.completion_tokens}")
+                    print(f"Total Cost:{cb.total_cost}")
+                    if isinstance(response, dict):
+                        # Extract the quiz data from the response
+                        quiz = response.get("quiz", None)
+                        if quiz is not None:
+                            table_data = get_table_data(quiz)
+                            if table_data is not None:
+                                df = pd.DataFrame(table_data)
+                                df.index = df.index + 1
+                                st.table(df)
+                                # Display the review in a text box as well
+                                st.text_area(label="Review", value=response["review"])
+                            else:
+                                st.error("Error in the table data")
+                    else:
+                        st.write(response)
